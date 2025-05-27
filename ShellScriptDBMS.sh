@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #!/bin/bash
 
 # ========================
@@ -47,3 +48,6 @@ launch_gui() { ... }
 # Script Entry Point
 # ========================
 main_menu
+=======
+
+>>>>>>> Elwaly
