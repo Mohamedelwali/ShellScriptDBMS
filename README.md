@@ -1,5 +1,3 @@
-Here's a **refined and organized version** of your `README.md` for `ShellScriptDBMS`, following best practices for clarity, readability, and professionalism:
-
 ---
 
 # ShellScriptDBMS
