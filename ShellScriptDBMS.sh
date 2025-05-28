@@ -225,6 +225,43 @@ insert_into_table() {
     echo "Record inserted into table '$tname'."
 }
 
+delete_from_table() {
+    local dbpath="$1"
+    read -p "Enter table name to delete from: " tname
+    if [ ! -f "$dbpath/$tname" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    IFS=' ' read -r -a types < <(sed -n '2p' "$dbpath/$tname.meta")
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    read -p "Enter primary key value to delete record: " pk_val
+    if [ -z "$pk_val" ]; then
+        echo "Primary key value cannot be empty."
+        return
+    fi
+
+    # Find primary key index
+    local pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [ "${columns[$i]}" == "$pk" ]; then
+            pk_index=$i
+            break
+        fi
+    done
+    if [ $pk_index -eq -1 ]; then
+        echo "Primary key column not found."
+        return
+    fi
+
+awk -F'|' -v pk_idx=$((pk_index+1)) -v pk_val="$pk_val" 'BEGIN{OFS=FS} $pk_idx != pk_val' "$dbpath/$tname" > "$dbpath/$tname.tmp" && mv "$dbpath/$tname.tmp" "$dbpath/$tname"
+echo "Record(s) with $pk=$pk_val deleted."
+    
+}
+
+
 
 main_menu
 
