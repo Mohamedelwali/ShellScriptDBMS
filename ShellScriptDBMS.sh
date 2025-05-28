@@ -160,6 +160,72 @@ drop_table() {
     fi
 }
 
+insert_into_table() {
+    local dbpath="$1"
+    read -p "Enter table name to insert into: " tname
+
+    if [ ! -f "$dbpath/$tname" ] || [ ! -f "$dbpath/$tname.meta" ]; then
+        echo "Table or metadata does not exist."
+        return
+    fi
+
+    # Reading metadata
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    IFS=' ' read -r -a types < <(sed -n '2p' "$dbpath/$tname.meta")
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    # Finding pkey index
+    pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [ "${columns[$i]}" == "$pk" ]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    if [ $pk_index -eq -1 ]; then
+        echo "Primary key not found in columns."
+        return
+    fi
+
+    # Collect values from user
+    values=()
+    for i in "${!columns[@]}"; do
+        col="${columns[$i]}"
+        dtype="${types[$i]}"
+
+        while true; do
+            read -p "Enter value for $col ($dtype): " val
+
+            # Simple datatype validation
+            if [ "$dtype" == "int" ]; then
+                if ! [[ "$val" =~ ^-?[0-9]+$ ]]; then
+                    echo "Invalid integer. Try again."
+                    continue
+                fi
+            fi
+
+            # Check primary key uniqueness
+            if [ $i -eq $pk_index ]; then
+                if grep -q "^$val" "$dbpath/$tname"; then
+                    echo "Primary key value '$val' already exists. Try again."
+                    continue
+                fi
+            fi
+
+            values+=("$val")
+            break
+        done
+    done
+
+    record=$(IFS='|'; echo "${values[*]}")
+
+    # Append to table file
+    echo "$record" >> "$dbpath/$tname"
+    echo "Record inserted into table '$tname'."
+}
+
+
 main_menu
 
 
