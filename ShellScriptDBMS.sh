@@ -138,6 +138,16 @@ create_table() {
     touch "$dbpath/$tname"
     echo "Table '$tname' created."
 }
+
+list_tables() {
+    local dbpath="$1"
+    echo "Tables:"
+    for file in "$dbpath"/*.meta; do
+        [ -e "$file" ] || { echo "No tables found."; return; }
+        tname=$(basename "$file" .meta)
+        echo "- $tname"
+    done
+}
 main_menu
 
 
