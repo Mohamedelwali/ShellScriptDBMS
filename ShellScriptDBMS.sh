@@ -333,6 +333,48 @@ update_table() {
 }
 
 
+select_from_table() {
+    local dbpath="$1"
+    read -p "Enter table name to select from: " tname
+
+    if [ ! -f "$dbpath/$tname" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [[ "${columns[$i]}" == "$pk" ]]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    echo "Select Options:"
+    echo "1. View all records"
+    echo "2. View a record by $pk"
+    read -p "Choose [1-2]: " opt
+
+    case $opt in
+        1)
+            echo "====== All Records in $tname ======"
+            echo "${columns[*]}"
+            cat "$dbpath/$tname"
+            ;;
+        2)
+            read -p "Enter $pk value: " pk_val
+            echo "${columns[*]}"
+            awk -F'|' -v pk_idx=$((pk_index+1)) -v pk_val="$pk_val" '$pk_idx == pk_val { print }' "$dbpath/$tname"
+            ;;
+        *)
+            echo "Invalid option."
+            ;;
+    esac
+}
+
 
 
 main_menu
