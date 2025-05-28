@@ -43,5 +43,17 @@ list_databases() {
     ls "$DB_DIR"
 }
 
-
+connect_database() {
+    read -p "Enter database name to connect: " dbname
+    if [ -d "$DB_DIR/$dbname" ]; then
+        echo "Connected to '$dbname'."
+        # Call the database menu here
+        database_menu "$dbname"
+    else
+        echo "Database does not exist."
+    fi
+}
 main_menu
+
+
+
