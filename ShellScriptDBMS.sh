@@ -63,6 +63,37 @@ drop_database() {
         echo "Database does not exist."
     fi
 }
+
+
+database_menu() {
+    local dbname="$1"
+    local dbpath="$DB_DIR/$dbname"
+
+    while true; do
+        echo "====== Database: $dbname ======"
+        echo "1. Create Table"
+        echo "2. List Tables"
+        echo "3. Drop Table"
+        echo "4. Insert into Table"
+        echo "5. Select From Table"
+        echo "6. Delete From Table"
+        echo "7. Update Table"
+        echo "8. Back to Main Menu"
+        read -p "Select an option [1-8]: " choice
+
+        case $choice in
+            1) create_table "$dbpath" ;;
+            2) list_tables "$dbpath" ;;
+            3) drop_table "$dbpath" ;;
+            4) insert_into_table "$dbpath" ;;
+            5) select_from_table "$dbpath" ;;
+            6) delete_from_table "$dbpath" ;;
+            7) update_table "$dbpath" ;;
+            8) break ;;
+            *) echo "Invalid option. Try again." ;;
+        esac
+    done
+}
 main_menu
 
 
