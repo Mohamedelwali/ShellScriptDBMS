@@ -148,6 +148,18 @@ list_tables() {
         echo "- $tname"
     done
 }
+
+drop_table() {
+    local dbpath="$1"
+    read -p "Enter table name to drop: " tname
+    if [ -f "$dbpath/$tname" ]; then
+        rm "$dbpath/$tname" "$dbpath/$tname.meta"
+        echo "Table '$tname' dropped."
+    else
+        echo "Table does not exist."
+    fi
+}
+
 main_menu
 
 
