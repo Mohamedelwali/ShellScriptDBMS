@@ -53,6 +53,16 @@ connect_database() {
         echo "Database does not exist."
     fi
 }
+
+drop_database() {
+    read -p "Enter database name to drop: " dbname
+    if [ -d "$DB_DIR/$dbname" ]; then
+        rm -r "$DB_DIR/$dbname"
+        echo "Database '$dbname' dropped."
+    else
+        echo "Database does not exist."
+    fi
+}
 main_menu
 
 
