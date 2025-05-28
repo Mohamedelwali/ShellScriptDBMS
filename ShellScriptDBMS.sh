@@ -94,6 +94,50 @@ database_menu() {
         esac
     done
 }
+
+create_table() {
+    local dbpath="$1"
+    read -p "Enter table name: " tname
+
+    if [ -f "$dbpath/$tname" ]; then
+        echo "Table already exists."
+        return
+    fi
+
+    read -p "Enter number of columns: " ncols
+    if ! [[ "$ncols" =~ ^[0-9]+$ ]] || [ "$ncols" -lt 1 ]; then
+        echo "Invalid number."
+        return
+    fi
+
+    columns=()
+    types=()
+    for (( i=1; i<=$ncols; i++ )); do
+        read -p "Enter name for column $i: " col
+        columns+=("$col")
+        read -p "Enter datatype for $col (int/string): " dtype
+        types+=("$dtype")
+    done
+
+    # Choose primary key
+    echo "Columns: ${columns[*]}"
+    read -p "Enter primary key column: " pk
+    if [[ ! " ${columns[@]} " =~ " $pk " ]]; then
+        echo "Invalid primary key."
+        return
+    fi
+
+    # Write metadata
+    {
+        echo "${columns[*]}"
+        echo "${types[*]}"
+        echo "$pk"
+    } > "$dbpath/$tname.meta"
+
+    # Create empty table file
+    touch "$dbpath/$tname"
+    echo "Table '$tname' created."
+}
 main_menu
 
 
