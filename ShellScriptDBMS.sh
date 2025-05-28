@@ -262,6 +262,78 @@ echo "Record(s) with $pk=$pk_val deleted."
 }
 
 
+update_table() {
+
+    local dbpath="$1"
+    read -p "Enter table name to update: " tname
+
+    if [ ! -f "$dbpath/$tname" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    IFS=' ' read -r -a types < <(sed -n '2p' "$dbpath/$tname.meta")
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    
+    pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [[ "${columns[$i]}" == "$pk" ]]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    if [ "$pk_index" -eq -1 ]; then
+        echo "Primary key not found in metadata."
+        return
+    fi
+
+    read -p "Enter value of $pk to update: " pk_val
+
+    
+    match_line=$(awk -F'|' -v pk_idx=$((pk_index+1)) -v pk_val="$pk_val" '$pk_idx == pk_val {print NR}' "$dbpath/$tname")
+    if [ -z "$match_line" ]; then
+        echo "No record found with $pk = $pk_val"
+        return
+    fi
+
+    echo "Updating record with $pk = $pk_val"
+
+    new_record=()
+    for i in "${!columns[@]}"; do
+        col="${columns[$i]}"
+        dtype="${types[$i]}"
+
+        if [[ "$col" == "$pk" ]]; then
+            new_record+=("$pk_val")  # Don't update primary key
+            continue
+        fi
+
+        read -p "Enter new value for $col ($dtype): " val
+
+        # Type check
+        if [[ "$dtype" == "int" && ! "$val" =~ ^[0-9]+$ ]]; then
+            echo "Invalid int value for $col"
+            return
+        fi
+
+        new_record+=("$val")
+    done
+
+   
+    IFS='|' updated_line="${new_record[*]}"
+
+    
+    awk -v ln="$match_line" -v newline="$updated_line" 'NR == ln {$0 = newline} {print}' "$dbpath/$tname" > "$dbpath/$tname.tmp" && mv "$dbpath/$tname.tmp" "$dbpath/$tname"
+
+    echo "Record updated successfully."
+}
+
+
+
 
 main_menu
 
