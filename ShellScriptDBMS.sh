@@ -1,9 +1,18 @@
-#!/bin/bash
+#!/bin/bash     (Shebang line use to explain the language of the script is bash)
 
 DB_DIR="./databases"
 
 # Ensure databases directory exists
 mkdir -p "$DB_DIR"
+
+# Validate names: start with letter or underscore, followed by letters, digits, or underscores
+is_valid_name() {
+    if [[ "$1" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
 
 main_menu() {
     while true; do
