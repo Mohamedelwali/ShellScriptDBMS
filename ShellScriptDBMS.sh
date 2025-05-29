@@ -160,6 +160,53 @@ drop_table() {
     fi
 }
 
+insert_into_table() {
+    local dbpath="$1"
+    read -p "Enter table name to insert into: " tname
+    local metafile="$dbpath/$tname.meta"
+    local tablefile="$dbpath/$tname"
+
+    if [ ! -f "$metafile" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    # Read metadata
+    IFS=' ' read -r -a columns < <(sed -n '1p' "$metafile")
+    IFS=' ' read -r -a types < <(sed -n '2p' "$metafile")
+    pk=$(sed -n '3p' "$metafile")
+
+    values=()
+    for i in "${!columns[@]}"; do
+        col="${columns[$i]}"
+        dtype="${types[$i]}"
+        while true; do
+            read -p "Enter value for $col ($dtype): " val
+            # Type validation
+            if [[ "$dtype" == "int" && ! "$val" =~ ^[0-9]+$ ]]; then
+                echo "Invalid integer."
+            elif [[ "$dtype" == "string" && -z "$val" ]]; then
+                echo "String cannot be empty."
+            else
+                # Primary key uniqueness check
+                if [ "$col" == "$pk" ]; then
+                    if grep -q "^$val" "$tablefile"; then
+                        echo "Primary key value already exists."
+                        continue
+                    fi
+                fi
+                values+=("$val")
+                break
+            fi
+        done
+    done
+
+    # Save row (space-separated)
+    echo "${values[*]}" >> "$tablefile"
+    echo "Row inserted."
+}
+
+
 main_menu
 
 
