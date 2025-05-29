@@ -284,6 +284,84 @@ delete_from_table() {
     echo "Row with $pk = $pk_val deleted."
 }
 
+update_table() {
+    local dbpath="$1"
+    read -p "Enter table name to update: " tname
+    local metafile="$dbpath/$tname.meta"
+    local tablefile="$dbpath/$tname"
+
+    if [ ! -f "$metafile" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    IFS=' ' read -r -a columns < <(sed -n '1p' "$metafile")
+    IFS=' ' read -r -a types < <(sed -n '2p' "$metafile")
+    pk=$(sed -n '3p' "$metafile")
+
+    # Find index of primary key column
+    local pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [ "${columns[$i]}" == "$pk" ]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    if [ $pk_index -eq -1 ]; then
+        echo "Primary key not found."
+        return
+    fi
+
+    read -p "Enter $pk value of row to update: " pk_val
+
+    # Find the row
+    local old_row
+    old_row=$(grep "^$pk_val" "$tablefile")
+    if [ -z "$old_row" ]; then
+        echo "No row found with $pk = $pk_val"
+        return
+    fi
+
+    IFS=' ' read -r -a old_values <<< "$old_row"
+    new_values=()
+
+    for i in "${!columns[@]}"; do
+        col="${columns[$i]}"
+        dtype="${types[$i]}"
+        old_val="${old_values[$i]}"
+        while true; do
+            read -p "Enter new value for $col ($dtype) [old: $old_val]: " val
+            # If empty input, keep old value
+            if [ -z "$val" ]; then
+                val="$old_val"
+            fi
+            # Validate type
+            if [[ "$dtype" == "int" && ! "$val" =~ ^[0-9]+$ ]]; then
+                echo "Invalid integer."
+            elif [[ "$dtype" == "string" && -z "$val" ]]; then
+                echo "String cannot be empty."
+            else
+                # If primary key changed, check uniqueness
+                if [ "$col" == "$pk" ] && [ "$val" != "$old_val" ]; then
+                    if grep -q "^$val" "$tablefile"; then
+                        echo "Primary key value already exists."
+                        continue
+                    fi
+                fi
+                new_values+=("$val")
+                break
+            fi
+        done
+    done
+
+    # Replace old row with new row
+    grep -v "^$pk_val" "$tablefile" > "$tablefile.tmp"
+    echo "${new_values[*]}" >> "$tablefile.tmp"
+    mv "$tablefile.tmp" "$tablefile"
+    echo "Row updated."
+}
+
 main_menu
 
 
