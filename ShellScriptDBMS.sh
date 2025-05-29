@@ -206,6 +206,42 @@ insert_into_table() {
     echo "Row inserted."
 }
 
+select_from_table() {
+    local dbpath="$1"
+    read -p "Enter table name to select from: " tname
+    local metafile="$dbpath/$tname.meta"
+    local tablefile="$dbpath/$tname"
+
+    if [ ! -f "$metafile" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    IFS=' ' read -r -a columns < <(sed -n '1p' "$metafile")
+
+    # Print header
+    printf "|"
+    for col in "${columns[@]}"; do
+        printf " %-15s |" "$col"
+    done
+    echo
+    printf "%0.s-" $(seq 1 $((18 * ${#columns[@]}))); echo
+
+    # Print rows
+    if [ ! -s "$tablefile" ]; then
+        echo "No data."
+        return
+    fi
+
+    while read -r line; do
+        IFS=' ' read -r -a fields <<< "$line"
+        printf "|"
+        for field in "${fields[@]}"; do
+            printf " %-15s |" "$field"
+        done
+        echo
+    done < "$tablefile"
+}
 
 main_menu
 
