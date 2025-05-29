@@ -243,6 +243,47 @@ select_from_table() {
     done < "$tablefile"
 }
 
+delete_from_table() {
+    local dbpath="$1"
+    read -p "Enter table name to delete from: " tname
+    local metafile="$dbpath/$tname.meta"
+    local tablefile="$dbpath/$tname"
+
+    if [ ! -f "$metafile" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    IFS=' ' read -r -a columns < <(sed -n '1p' "$metafile")
+    pk=$(sed -n '3p' "$metafile")
+
+    # Find index of primary key column
+    local pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [ "${columns[$i]}" == "$pk" ]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    if [ $pk_index -eq -1 ]; then
+        echo "Primary key not found in columns."
+        return
+    fi
+
+    read -p "Enter $pk value to delete: " pk_val
+
+    # Check if row exists
+    if ! grep -q "^$pk_val" "$tablefile"; then
+        echo "No row found with $pk = $pk_val"
+        return
+    fi
+
+    # Delete the row
+    grep -v "^$pk_val" "$tablefile" > "$tablefile.tmp" && mv "$tablefile.tmp" "$tablefile"
+    echo "Row with $pk = $pk_val deleted."
+}
+
 main_menu
 
 
