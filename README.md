@@ -1,4 +1,4 @@
-# Simple Bash DBMS
+# 🐚 Simple Bash DBMS
 
 A menu-driven mini Database Management System (DBMS) written in Bash.  
 **Authors:** Mohamed Elwaly, Hassan Amer  
