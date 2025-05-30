@@ -135,6 +135,6 @@ Mohamed Elwaly, Hassan Amer
 
 ---
 
-**Enjoy using Bash DBMS!**
+**Enjoy using our Bash DBMS!**
 
 ---
