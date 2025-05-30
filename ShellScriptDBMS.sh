@@ -237,7 +237,7 @@ create_table() {
         done
     done
 
-    echo "Columns: ${columns[*]}"
+    echo -e "${BLUE}Columns: ${columns[*]}${NC}"
     while true; do
         read -r -p "Enter primary key column: " pk
         if [[ " ${columns[*]} " == *" $pk "* ]]; then
