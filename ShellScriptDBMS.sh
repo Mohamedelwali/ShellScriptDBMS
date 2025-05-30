@@ -6,25 +6,45 @@
 # Description: A menu-driven mini database management system in Bash.
 
 
-# Print help if requested
-if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
-    echo -e "${GREEN}Simple Bash DBMS v$VERSION${NC}"
-    echo "Usage: ./ShellScriptDBMS.sh"
-    echo "Follow the interactive menu prompts."
-    exit 0
-fi
+# Colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+SKYBLUE='\033[0;36m'
+NC='\033[0m' # No Color
 
 
 # Trap Ctrl+C for clean exit
 trap 'echo -e "\n${YELLOW}Exiting...${NC}"; exit 0' SIGINT
 
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+# Function to print help message
+print_help() {
+    echo
+    echo -e "${GREEN}Simple Bash DBMS $VERSION${NC}"
+    echo
+    echo -e "${YELLOW}Usage:${NC} ${BLUE}./ShellScriptDBMS.sh [OPTIONS]${NC}"
+    echo
+    echo -e "${YELLOW}Options:${NC} ${BLUE}-h, --help      Show this help message and exit.${NC}"
+    echo
+    echo -e "${PURPLE}Run the script without options to start the interactive menu.${NC}"
+    echo
+    echo -e "${YELLOW}Description:${NC}"
+    echo -e "  ${SKYBLUE}A menu-driven mini database management system implemented in Bash.${NC}"
+    echo -e "  ${SKYBLUE}Supports creating, listing, connecting, and dropping databases and tables,${NC}"
+    echo -e "  ${SKYBLUE}as well as inserting, selecting, updating, and deleting table data.${NC}"
+    echo
+}
+
+# Check if the script is run with root privileges
+VERSION="Version 1.0"
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    print_help
+    exit 0
+fi
 
 
 # Validate names: start with letter or underscore, followed by letters, digits, or underscores
