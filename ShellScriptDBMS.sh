@@ -74,18 +74,15 @@ create_database() {
     read -r -p "Enter new database name: " dbname   # Use read -r to prevent backslash escapes.
     if ! is_valid_name "$dbname"; then
         echo -e "${RED}Invalid database name. Must start with a letter or underscore, followed by letters, digits, or underscores.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
     if [ -d "$DB_DIR/$dbname" ]; then
         echo -e "${YELLOW}Database '$dbname' already exists.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     else
         mkdir "$DB_DIR/$dbname"
         echo -e "${GREEN}Database '$dbname' created.${NC}" 
-        read -r -p "Press Enter to continue..." 
     fi
 }
 
@@ -93,9 +90,12 @@ create_database() {
 # List all databases
 list_databases() {
     echo "Databases:"
+
+    # Check if the database directory exists and is not empty
     if [ -d "$DB_DIR" ]; then
         local db_count
         db_count=$(find "$DB_DIR" -maxdepth 1 -mindepth 1 -type d | wc -l)
+        # If no databases found, print a message
         if [ "$db_count" -eq 0 ]; then
             echo -e "${YELLOW}No databases found.${NC}"
         else
@@ -107,7 +107,6 @@ list_databases() {
     else
         echo -e "${YELLOW}No databases found.${NC}"
     fi
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -118,17 +117,14 @@ connect_database() {
     # Validate database name format
     if ! is_valid_name "$dbname"; then
         echo -e "${RED}Invalid database name. Use letters, digits, underscores; start with letter or underscore.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
-
+    # Check if the database exists
     if [ -d "$DB_DIR/$dbname" ]; then
         echo -e "${GREEN}Connected to '$dbname'.${NC}"
-        read -r -p "Press Enter to continue..."
         database_menu "$dbname"
     else
         echo -e "${YELLOW}Database does not exist.${NC}"
-        read -r -p "Press Enter to continue..."
     fi
 }
 
@@ -140,12 +136,12 @@ drop_database() {
     # Validate database name
     if ! is_valid_name "$dbname"; then
         echo -e "${RED}Invalid database name.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
-
+    # Check if the database exists
     if [ -d "$DB_DIR/$dbname" ]; then
         read -r -p "Are you sure you want to delete database '$dbname'? This action cannot be undone. (y/n): " confirm
+        # Confirm deletion
         if [[ "$confirm" =~ ^[Yy]$ ]]; then
             rm -r "$DB_DIR/$dbname"
             echo -e "${GREEN}Database '$dbname' dropped.${NC}"
@@ -155,7 +151,6 @@ drop_database() {
     else
         echo -e "${YELLOW}Database does not exist.${NC}"
     fi
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -202,19 +197,16 @@ create_table() {
     read -r -p "Enter table name: " tname
     if ! is_valid_name "$tname"; then
         echo -e "${RED}Invalid table name.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
     if [ -f "$dbpath/$tname" ]; then
         echo -e "${YELLOW}Table already exists.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
     read -r -p "Enter number of columns: " ncols
     if ! [[ "$ncols" =~ ^[0-9]+$ ]] || [ "$ncols" -lt 1 ]; then
         echo -e "${RED}Invalid number.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -263,7 +255,6 @@ create_table() {
 
     touch "$dbpath/$tname"
     echo -e "${GREEN}Table '$tname' created.${NC}"
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -279,7 +270,6 @@ list_tables() {
 
     if [ ${#meta_files[@]} -eq 0 ]; then
         echo -e "${YELLOW}No tables found.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -288,8 +278,6 @@ list_tables() {
         tname=$(basename "$file" .meta)
         echo "  - $tname"
     done
-
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -301,7 +289,6 @@ drop_table() {
     # Validate table name
     if ! is_valid_name "$tname"; then
         echo -e "${RED}Invalid table name.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -316,7 +303,6 @@ drop_table() {
     else
         echo -e "${YELLOW}Table does not exist.${NC}"
     fi
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -329,7 +315,6 @@ insert_into_table() {
 
     if [ ! -f "$metafile" ]; then
         echo -e "${RED}Table does not exist.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -366,7 +351,6 @@ insert_into_table() {
     # Save row (space-separated)
     echo "${values[*]}" >> "$tablefile"
     echo -e "${GREEN}Row inserted.${NC}"
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -379,7 +363,6 @@ select_from_table() {
 
     if [ ! -f "$metafile" ]; then
         echo -e "${RED}Table does not exist.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -396,7 +379,6 @@ select_from_table() {
     # Print rows
     if [ ! -s "$tablefile" ]; then
         echo -e "${YELLOW}No data.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -408,8 +390,6 @@ select_from_table() {
         done
         echo
     done < "$tablefile"
-
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -422,7 +402,6 @@ delete_from_table() {
 
     if [ ! -f "$metafile" ]; then
         echo -e "${RED}Table does not exist.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -440,7 +419,6 @@ delete_from_table() {
 
     if [ $pk_index -eq -1 ]; then
         echo -e "${RED}Primary key not found in columns.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -449,7 +427,6 @@ delete_from_table() {
     # Check if row exists
     if ! grep -q "^$pk_val" "$tablefile"; then
         echo -e "${YELLOW}No row found with $pk = $pk_val.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -457,14 +434,12 @@ delete_from_table() {
     read -r -p "Are you sure you want to delete the row with $pk = $pk_val? (y/n): " confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "${YELLOW}Deletion cancelled.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
     # Delete the row
     grep -v "^$pk_val" "$tablefile" > "$tablefile.tmp" && mv "$tablefile.tmp" "$tablefile"
     echo -e "${GREEN}Row with $pk = $pk_val deleted.${NC}"
-    read -r -p "Press Enter to continue..."
 }
 
 
@@ -477,7 +452,6 @@ update_table() {
 
     if [ ! -f "$metafile" ]; then
         echo -e "${RED}Table does not exist.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -496,7 +470,6 @@ update_table() {
 
     if [ $pk_index -eq -1 ]; then
         echo -e "${RED}Primary key not found.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -507,7 +480,6 @@ update_table() {
     old_row=$(grep "^$pk_val" "$tablefile")
     if [ -z "$old_row" ]; then
         echo -e "${YELLOW}No row found with $pk = $pk_val.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -549,7 +521,6 @@ update_table() {
     read -r -p "Confirm update? (y/n): " confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
         echo -e "${YELLOW}Update cancelled.${NC}"
-        read -r -p "Press Enter to continue..."
         return
     fi
 
@@ -559,7 +530,6 @@ update_table() {
     mv "$tablefile.tmp" "$tablefile"
 
     echo -e "${GREEN}Row updated successfully.${NC}"
-    read -r -p "Press Enter to continue..."
 }
 
 
