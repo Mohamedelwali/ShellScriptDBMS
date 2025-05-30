@@ -41,10 +41,6 @@ DB_DIR="./databases"
 mkdir -p "$DB_DIR"
 
 
-
-
-
-
 # ===== Main Menu =====
 main_menu() {
     while true; do
