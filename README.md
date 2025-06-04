@@ -1,165 +1,140 @@
+# 🐚 Simple Bash DBMS
 
-# 🐚 ShellScriptDBMS
-
-**ShellScriptDBMS** is a lightweight, menu-driven Database Management System implemented entirely in Shell Script. It allows users to create, manage, and interact with databases and tables directly from the command line — a great tool for learning database fundamentals and shell scripting.
-
----
-
-## 📑 Table of Contents
-
-* [Features](#features)
-* [Getting Started](#getting-started)
-
-  * [Prerequisites](#prerequisites)
-  * [Installation](#installation)
-* [Usage](#usage)
-
-  * [Main Menu](#main-menu)
-  * [Database Menu](#database-menu)
-  * [Data Validation](#data-validation)
-* [Project Structure](#project-structure)
-* [Technical Details](#technical-details)
-* [Bonus Features](#bonus-features)
-* [Contributing](#contributing)
+A menu-driven mini Database Management System (DBMS) written in Bash.  
+**Authors:** Mohamed Elwaly, Hassan Amer  
+**Version:** 1.0  
+**Date:** 2025-05-30
 
 ---
 
-## ✅ Features
+## 🚀 Features
 
-* **Command-Line Interface (CLI):** User-friendly, menu-based navigation.
-* **Database Operations:**
-
-  * Create, list, connect to, and delete databases (directories).
-* **Table Operations:**
-
-  * Create, list, and delete tables (files) within a database.
-* **Data Operations:**
-
-  * Insert, select, update, and delete table records.
-  * Display output in a readable, formatted table.
-* **Data Integrity:**
-
-  * Define column data types and primary keys.
-  * Enforce data type and primary key constraints on inserts and updates.
+- **Create, List, Connect, and Drop Databases**
+- **Create, List, Drop Tables**
+- **Insert, Select, Update, and Delete Rows**
+- **Primary key enforcement and data type validation**
+- **Colorful, user-friendly CLI with confirmation prompts**
+- **Safe input handling and robust error checking**
 
 ---
 
-## 🚀 Getting Started
+## 🛠️ Installation & Usage
 
-### 📋 Prerequisites
+### Requirements
+- Bash (version 4+ recommended)
+- Linux/macOS/WSL
 
-* Unix/Linux operating system
-* Bash or a compatible shell
+### Clone and Run
 
-### 🛠 Installation
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/Mohamedelwali/ShellScriptDBMS.git
-   cd ShellScriptDBMS
-   ```
-
-2. Run the application using any of the following:
-
-   ```bash
-   bash ShellScriptDBMS.sh
-   # OR
-   sh ShellScriptDBMS.sh
-   # OR
-   chmod +x ShellScriptDBMS.sh
-   ./ShellScriptDBMS.sh
-   ```
-
----
-
-## 💡 Usage
-
-### 🧭 Main Menu
-
-* Create Database
-* List Databases
-* Connect to Database
-* Drop Database
-
-### 🗂 Database Menu (after connecting)
-
-* Create Table
-* List Tables
-* Drop Table
-* Insert into Table
-* Select from Table
-* Delete from Table
-* Update Table
-
-### 🛡 Data Validation
-
-* Specify column data types and primary key during table creation.
-* On insert/update:
-
-  * Validate data type.
-  * Ensure primary key uniqueness.
-
----
-
-## 📁 Project Structure
-
-```
-ShellScriptDBMS/
-├── ShellScriptDBMS.sh      # Main application script
-├── databases/              # Stores all databases as directories
-└── README.md               # Project documentation
+```bash
+git clone https://github.com/Mohamedelwali/ShellScriptDBMS.git
+cd ShellScriptDBMS
+chmod +x ShellScriptDBMS.sh
+./ShellScriptDBMS.sh
 ```
 
-* **Databases:** Represented as directories inside the `databases/` folder.
-* **Tables:** Represented as text files within their respective database directories.
+Or display help:
+
+```bash
+./ShellScriptDBMS.sh --help
+```
 
 ---
 
-## ⚙️ Technical Details
+## 📖 How It Works
 
-* **Language:** Pure Bash scripting for simplicity and system compatibility.
-* **Storage Mechanism:** File-system-based (directories for databases, files for tables).
-* **User Interface:** Menu-driven with text-based selections.
-* **Display:** Clean, tabular formatting for data presentation in terminal.
-
----
-
-## 🌟 Bonus Features
-
-> *Planned or optional future enhancements:*
-
-* **SQL Mode:** Support for SQL-like commands for power users.
-* **GUI Mode:** A graphical interface to replace CLI-based interaction.
+- **Databases** are directories inside `./databases/`.
+- **Tables** are files with metadata (`.meta`) and data.
+- **All operations** are menu-driven and interactive.
 
 ---
 
-## 🤝 Contributing
+## 🗂️ Main Menu
 
-Contributions are welcome!
+```
+1. Create Database
+2. List Databases
+3. Connect To Database
+4. Drop Database
+5. Exit
+```
 
-To contribute:
+### Database Menu
 
-1. Fork this repository.
-2. Create a new feature branch:
-
-   ```bash
-   git checkout -b feature-name
-   ```
-3. Commit your changes:
-
-   ```bash
-   git commit -m "Add some feature"
-   ```
-4. Push to your branch:
-
-   ```bash
-   git push origin feature-name
-   ```
-5. Open a Pull Request.
+```
+1. Create Table
+2. List Tables
+3. Drop Table
+4. Insert into Table
+5. Select From Table
+6. Delete From Table
+7. Update Table
+8. Back to Main Menu
+```
 
 ---
 
-Let me know if you'd like this deployed as a documentation site (e.g., GitHub Pages or MkDocs).
+## 📝 Example Session
 
-Would you like me to convert this into a downloadable `README.md` file or auto-push it to your GitHub repo?
+```text
+Welcome to the Simple DBMS
+====== DBMS Main Menu ======
+1. Create Database
+...
+Select an option [1-5]: 1
+Enter new database name: school
+Database 'school' created.
+...
+```
+
+---
+
+## ⚙️ Script Structure
+
+- **ShellScriptDBMS.sh** – Main script, contains all logic and menus
+
+---
+
+## 🧑‍💻 Developer Notes
+
+- All functions are modular and documented.
+- Color variables are defined at the top for easy customization.
+- Input validation and confirmation prompts protect your data.
+- Easily extensible for more features (see below).
+
+---
+
+## 🌱 Future Enhancements
+
+- **Backup and Restore**: Archive and restore databases.
+- **SQL-like Query Interface**: Support for simple SQL commands.
+- **Advanced Querying**: Conditional selects, column filtering.
+- **Logging**: Audit trail for all operations.
+- **Transaction Support**: Commit and rollback.
+- **Packaging**: Install script and user manual.
+
+---
+
+## 🤝 Contribution
+
+Pull requests and suggestions are welcome!  
+Please fork the repo and submit your improvements.
+
+---
+
+## 📄 License
+
+MIT License.
+
+---
+
+## 📬 Contact
+
+For questions or support, contact:  
+Mohamed Elwaly, Hassan Amer
+
+---
+
+**Enjoy using our Bash DBMS!**
+
+---
