@@ -325,7 +325,6 @@ drop_table() {
     fi
 }
 
-<<<<<<< HEAD
 insert_into_table() {
     local dbpath="$1"
     read -p "Enter table name to insert into: " tname
@@ -355,7 +354,6 @@ insert_into_table() {
     fi
 
     # Collect values from user
-=======
 
 # Insert a new row into a table
 insert_into_table() {
@@ -374,12 +372,10 @@ insert_into_table() {
     IFS=' ' read -r -a types < <(sed -n '2p' "$metafile")
     pk=$(sed -n '3p' "$metafile")
 
->>>>>>> Elwaly
     values=()
     for i in "${!columns[@]}"; do
         col="${columns[$i]}"
         dtype="${types[$i]}"
-<<<<<<< HEAD
 
         while true; do
             read -p "Enter value for $col ($dtype): " val
@@ -563,7 +559,6 @@ update_table() {
 
 main_menu
 
-=======
         while true; do
             read -r -p "Enter value for $col ($dtype): " val
             # Type validation
@@ -772,5 +767,4 @@ update_table() {
 
 # ===== Start the main menu =====
 main_menu
->>>>>>> Development
->>>>>>> Elwaly
+
