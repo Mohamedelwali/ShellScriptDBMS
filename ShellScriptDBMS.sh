@@ -325,6 +325,37 @@ drop_table() {
     fi
 }
 
+<<<<<<< HEAD
+insert_into_table() {
+    local dbpath="$1"
+    read -p "Enter table name to insert into: " tname
+
+    if [ ! -f "$dbpath/$tname" ] || [ ! -f "$dbpath/$tname.meta" ]; then
+        echo "Table or metadata does not exist."
+        return
+    fi
+
+    # Reading metadata
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    IFS=' ' read -r -a types < <(sed -n '2p' "$dbpath/$tname.meta")
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    # Finding pkey index
+    pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [ "${columns[$i]}" == "$pk" ]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    if [ $pk_index -eq -1 ]; then
+        echo "Primary key not found in columns."
+        return
+    fi
+
+    # Collect values from user
+=======
 
 # Insert a new row into a table
 insert_into_table() {
@@ -343,10 +374,196 @@ insert_into_table() {
     IFS=' ' read -r -a types < <(sed -n '2p' "$metafile")
     pk=$(sed -n '3p' "$metafile")
 
+>>>>>>> Elwaly
     values=()
     for i in "${!columns[@]}"; do
         col="${columns[$i]}"
         dtype="${types[$i]}"
+<<<<<<< HEAD
+
+        while true; do
+            read -p "Enter value for $col ($dtype): " val
+
+            # Simple datatype validation
+            if [ "$dtype" == "int" ]; then
+                if ! [[ "$val" =~ ^-?[0-9]+$ ]]; then
+                    echo "Invalid integer. Try again."
+                    continue
+                fi
+            fi
+
+            # Check primary key uniqueness
+            if [ $i -eq $pk_index ]; then
+                if grep -q "^$val" "$dbpath/$tname"; then
+                    echo "Primary key value '$val' already exists. Try again."
+                    continue
+                fi
+            fi
+
+            values+=("$val")
+            break
+        done
+    done
+
+    record=$(IFS='|'; echo "${values[*]}")
+
+    # Append to table file
+    echo "$record" >> "$dbpath/$tname"
+    echo "Record inserted into table '$tname'."
+}
+select_from_table() {
+    local dbpath="$1"
+    read -p "Enter table name to select from: " tname
+
+    if [ ! -f "$dbpath/$tname" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [[ "${columns[$i]}" == "$pk" ]]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    echo "Select Options:"
+    echo "1. View all records"
+    echo "2. View a record by $pk"
+    read -p "Choose [1-2]: " opt
+
+    case $opt in
+        1)
+            echo "====== All Records in $tname ======"
+            echo "${columns[*]}"
+            cat "$dbpath/$tname"
+            ;;
+        2)
+            read -p "Enter $pk value: " pk_val
+            echo "${columns[*]}"
+            awk -F'|' -v pk_idx=$((pk_index+1)) -v pk_val="$pk_val" '$pk_idx == pk_val { print }' "$dbpath/$tname"
+            ;;
+        *)
+            echo "Invalid option."
+            ;;
+    esac
+}
+
+delete_from_table() {
+    local dbpath="$1"
+    read -p "Enter table name to delete from: " tname
+    if [ ! -f "$dbpath/$tname" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    IFS=' ' read -r -a types < <(sed -n '2p' "$dbpath/$tname.meta")
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    read -p "Enter primary key value to delete record: " pk_val
+    if [ -z "$pk_val" ]; then
+        echo "Primary key value cannot be empty."
+        return
+    fi
+
+    # Find primary key index
+    local pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [ "${columns[$i]}" == "$pk" ]; then
+            pk_index=$i
+            break
+        fi
+    done
+    if [ $pk_index -eq -1 ]; then
+        echo "Primary key column not found."
+        return
+    fi
+
+awk -F'|' -v pk_idx=$((pk_index+1)) -v pk_val="$pk_val" 'BEGIN{OFS=FS} $pk_idx != pk_val' "$dbpath/$tname" > "$dbpath/$tname.tmp" && mv "$dbpath/$tname.tmp" "$dbpath/$tname"
+echo "Record(s) with $pk=$pk_val deleted."
+}
+
+
+update_table() {
+
+    local dbpath="$1"
+    read -p "Enter table name to update: " tname
+
+    if [ ! -f "$dbpath/$tname" ]; then
+        echo "Table does not exist."
+        return
+    fi
+
+    
+    IFS=' ' read -r -a columns < "$dbpath/$tname.meta"
+    IFS=' ' read -r -a types < <(sed -n '2p' "$dbpath/$tname.meta")
+    pk=$(sed -n '3p' "$dbpath/$tname.meta")
+
+    
+    pk_index=-1
+    for i in "${!columns[@]}"; do
+        if [[ "${columns[$i]}" == "$pk" ]]; then
+            pk_index=$i
+            break
+        fi
+    done
+
+    if [ "$pk_index" -eq -1 ]; then
+        echo "Primary key not found in metadata."
+        return
+    fi
+
+    read -p "Enter value of $pk to update: " pk_val
+
+    
+    match_line=$(awk -F'|' -v pk_idx=$((pk_index+1)) -v pk_val="$pk_val" '$pk_idx == pk_val {print NR}' "$dbpath/$tname")
+    if [ -z "$match_line" ]; then
+        echo "No record found with $pk = $pk_val"
+        return
+    fi
+
+    echo "Updating record with $pk = $pk_val"
+
+    new_record=()
+    for i in "${!columns[@]}"; do
+        col="${columns[$i]}"
+        dtype="${types[$i]}"
+
+        if [[ "$col" == "$pk" ]]; then
+            new_record+=("$pk_val")  # Don't update primary key
+            continue
+        fi
+
+        read -p "Enter new value for $col ($dtype): " val
+
+        # Type check
+        if [[ "$dtype" == "int" && ! "$val" =~ ^[0-9]+$ ]]; then
+            echo "Invalid int value for $col"
+            return
+        fi
+
+        new_record+=("$val")
+    done
+
+   
+    IFS='|' updated_line="${new_record[*]}"
+
+    
+    awk -v ln="$match_line" -v newline="$updated_line" 'NR == ln {$0 = newline} {print}' "$dbpath/$tname" > "$dbpath/$tname.tmp" && mv "$dbpath/$tname.tmp" "$dbpath/$tname"
+
+    echo "Record updated successfully."
+}
+
+
+
+main_menu
+
+=======
         while true; do
             read -r -p "Enter value for $col ($dtype): " val
             # Type validation
@@ -555,3 +772,4 @@ update_table() {
 
 # ===== Start the main menu =====
 main_menu
+>>>>>>> Elwaly
