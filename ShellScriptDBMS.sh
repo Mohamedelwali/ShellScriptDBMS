@@ -50,9 +50,9 @@ fi
 # Validate names: start with letter or underscore, followed by letters, digits, or underscores
 is_valid_name() {
     if [[ "$1" =~ ^[a-zA-Z_][a-zA-Z0-9_]*$ ]]; then
-        return 0
+        return 0 # Return success (valid name).
     else
-        return 1
+        return 1 # Return failure (invalid name).
     fi
 }
 
